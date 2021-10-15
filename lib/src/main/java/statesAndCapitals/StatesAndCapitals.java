@@ -6,6 +6,7 @@ package statesAndCapitals;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import static java.util.stream.Collectors.*;
 public class StatesAndCapitals
 {
 
-    String statesAndCapitalsFilePath = ".\\src\\main\\resources\\us_states_and_capitals.json";
+    String statesAndCapitalsFilePath = "./src/main/resources/us_states_and_capitals.json";
 
     public ArrayList<StateInfo> readStatesAndCapitals() throws IOException
     {
@@ -66,8 +67,7 @@ public class StatesAndCapitals
         // Use limit()
 
         List<StateInfo> firstFiveStates = null;
-
-        firstFiveStates.stream().limit(5)
+        firstFiveStates = states.stream().limit(5).collect(toList());
 
         testResults.put("B1", StatesAndCapitalsCheck.basic1(firstFiveStates));
 
@@ -75,13 +75,13 @@ public class StatesAndCapitals
         // Use skip()
 
         List<StateInfo> lastFiveStates = null;
-
+        lastFiveStates = states.stream().skip(45).collect(toList());
         testResults.put("B2", StatesAndCapitalsCheck.basic2(lastFiveStates));
 
         // B3. From 1-20, submit the first 5 numbers
         // Use limit()
 
-        List<Integer> firstFiveNumbers = IntStream.range(1, 20).boxed().collect(toList());
+        List<Integer> firstFiveNumbers = IntStream.range(1, 20).boxed().limit(5).collect(toList());
 
         testResults.put("B3", StatesAndCapitalsCheck.basic3(firstFiveNumbers));
 
@@ -89,7 +89,7 @@ public class StatesAndCapitals
         // Use skip()
 
         List<Integer> lastFiveNumbers = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20).collect(toList());
-
+        lastFiveNumbers = lastFiveNumbers.stream().skip(15).collect(toList());
         testResults.put("B4", StatesAndCapitalsCheck.basic4(lastFiveNumbers));
 
         // B5. Submit the total number of states
@@ -97,7 +97,7 @@ public class StatesAndCapitals
         // PS: Don't use states.size(). It's easier and IntelliJ will even warn you not to do things this way. But I want you to understand how to use count() (or counting()).
 
         Long statesNumber = null;
-
+        statesNumber = states.stream().count();
         testResults.put("B5", StatesAndCapitalsCheck.basic5(statesNumber));
 
         // ***** Intermediate (any / first / all / none matches) *****
@@ -107,20 +107,21 @@ public class StatesAndCapitals
         // Can use filter()
 
         StateInfo cardinalState = null;
-
+        cardinalState = states.stream().filter(s -> s.getStateBird().equals("cardinal")).findAny().orElse(null);
         testResults.put("I1", StatesAndCapitalsCheck.int1(cardinalState));
 
         // I2. Find if any state's lowest elevation is less than 0
         // Use anyMatch()
 
         Boolean isAnyStateLessThan0Elevation = null;
-
+        isAnyStateLessThan0Elevation = states.stream().anyMatch(s -> s.getLowestElevationInFeet() < 0);
         testResults.put("I2", StatesAndCapitalsCheck.int2(isAnyStateLessThan0Elevation));
 
         // I3. Find if any state's highest elevation is greater than 21000
         // Use anyMatch()
 
         Boolean isAnyStateGreaterThan21000Elevation = null;
+       isAnyStateGreaterThan21000Elevation = states.stream().anyMatch(s -> s.getHighestElevationInFeet() > 21000);
 
         testResults.put("I3", StatesAndCapitalsCheck.int3(isAnyStateGreaterThan21000Elevation));
 
@@ -128,7 +129,7 @@ public class StatesAndCapitals
         // Use allMatch()
 
         Boolean doAllStatesHaveAnAnthem = null;
-
+        doAllStatesHaveAnAnthem = states.stream().allMatch(s -> s.getStateAnthem() != null);
         testResults.put("I4", StatesAndCapitalsCheck.int4(doAllStatesHaveAnAnthem));
 
         // I5. Find if no state has a one-word motto
@@ -136,7 +137,7 @@ public class StatesAndCapitals
         // Can use String.split()
 
         Boolean doNoStatesHaveAOneWordMotto = null;
-
+        doNoStatesHaveAOneWordMotto = states.stream().noneMatch(s -> s.getStateMotto().split(" ").length > 1);
         testResults.put("I5", StatesAndCapitalsCheck.int5(doNoStatesHaveAOneWordMotto));
 
         // ***** Advanced 1 (aggregation) *****
@@ -145,7 +146,7 @@ public class StatesAndCapitals
         // Use collect(averagingDouble())
 
         Double averageYearlyPrecipitationAcrossStateCapitals = null;
-
+        averageYearlyPrecipitationAcrossStateCapitals = states.stream().collect(averagingDouble(s -> s.getCapital().getAverageYearlyPrecipitationInInches()));
         testResults.put("A11", StatesAndCapitalsCheck.adv11(averageYearlyPrecipitationAcrossStateCapitals));
 
         // A12. Submit the total yearly precipitation across all state capitals
@@ -153,21 +154,21 @@ public class StatesAndCapitals
         // Or use mapToInt() and sum()
 
         Integer totalYearlyPrecipitationAcrossStateCapitals = null;
-
+        totalYearlyPrecipitationAcrossStateCapitals = states.stream().collect(summingInt(s -> s.getCapital().getAverageYearlyPrecipitationInInches()));
         testResults.put("A12", StatesAndCapitalsCheck.adv12(totalYearlyPrecipitationAcrossStateCapitals));
 
         // A13. Submit how many states are in each time zone (or group of time zones)
         // Use collect(groupingBy()) and counting()
 
         Map<Object, Long> numberOfStatesByTimeZone = null;
-
+        numberOfStatesByTimeZone = states.stream().collect(groupingBy(s -> s.getTimeZones(), counting()));
         testResults.put("A13", StatesAndCapitalsCheck.adv13(numberOfStatesByTimeZone));
 
         // A14. Submit how many state capitals are in each time zone
         // Use collect(groupingBy()) and counting()
 
         Map<Object, Long> numberOfStateCapitalsByTimeZone = null;
-
+        numberOfStateCapitalsByTimeZone = states.stream().collect(groupingBy(s -> s.getCapital().getTimeZone(), counting()));
         testResults.put("A14", StatesAndCapitalsCheck.adv14(numberOfStateCapitalsByTimeZone));
 
         // ***** Advanced 2 (requires map() + additional technique(s)) *****
@@ -176,28 +177,28 @@ public class StatesAndCapitals
         // Use sorted() and map()
 
         List<String> stateTreesSortedAscending = null;
-
+        stateTreesSortedAscending = states.stream().map(StateInfo::getStateTree).sorted().collect(toList());
         testResults.put("A21", StatesAndCapitalsCheck.adv21(stateTreesSortedAscending));
 
         // A22. Submit all state names, separated by "; "
         // Use collect(joining()) and map()
 
         String allStateNamesSemicolonDelimited = null;
-
+        allStateNamesSemicolonDelimited = states.stream().map(StateInfo::getStateName).collect(joining("; "));
         testResults.put("A22", StatesAndCapitalsCheck.adv22(allStateNamesSemicolonDelimited));
 
         // A23. Submit all distinct state birds
         // Use distinct() and map()
 
         List<String> allDistinctStateBirds = null;
-
+        allDistinctStateBirds = states.stream().map(s -> s.getStateBird()).distinct().collect(toList());
         testResults.put("A23", StatesAndCapitalsCheck.adv23(allDistinctStateBirds));
 
         // A24. Submit all distinct state birds, but with any kind of mockingbird removed
         // Use distinct(), map(), and filter()
 
         List<String> allDistinctStateBirdsMinusMockingbirds = null;
-
+        allDistinctStateBirdsMinusMockingbirds = states.stream().filter(s -> !s.getStateBird().contains("mockingbird")).map(s -> s.getStateBird()).distinct().collect(toList());
         testResults.put("A24", StatesAndCapitalsCheck.adv24(allDistinctStateBirdsMinusMockingbirds));
 
         // A25. Submit the number of distinct state birds
@@ -205,7 +206,7 @@ public class StatesAndCapitals
         // PS: Don't use count(). IntelliJ will warn you but I want you to see how counting() works.
 
         Long numberOfDistinctStateBirds = null;
-
+        numberOfDistinctStateBirds = states.stream().map(s -> s.getStateBird()).distinct().collect(counting());
         testResults.put("A25", StatesAndCapitalsCheck.adv25(numberOfDistinctStateBirds));
 
         // ***** Advanced 3 (custom comparators) *****
